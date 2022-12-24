@@ -1,30 +1,30 @@
-/**
- * Copyright © 2014-2022 HashiCorp, Inc.
- *
- * This Source Code is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this project, you can obtain one at http://mozilla.org/MPL/2.0/.
- *
- */
-
 resource "aws_s3_bucket" "vault_license_bucket" {
   bucket_prefix = "${var.resource_name_prefix}-vault-license"
-  acl           = "private"
+  force_destroy = true
+  tags = var.common_tags
+}
 
-  versioning {
-    enabled = true
-  }
+resource "aws_s3_bucket_server_side_encryption_configuration" "vault_bucket_encryption" {
+  bucket = aws_s3_bucket.vault_license_bucket.bucket
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = var.kms_key_arn
-        sse_algorithm     = "aws:kms"
-      }
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = var.kms_key_arn
+      sse_algorithm     = "aws:kms"
     }
   }
+}
 
-  force_destroy = true
+resource "aws_s3_bucket_versioning" "vault_license_bucket_versioning" {
+  bucket = aws_s3_bucket.vault_license_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 
-  tags = var.common_tags
+resource "aws_s3_bucket_acl" "vault_license_bucket_acl" {
+  bucket = aws_s3_bucket.vault_license_bucket.id
+  acl    = "private"
 }
 
 resource "aws_s3_bucket_public_access_block" "vault_license_bucket" {
