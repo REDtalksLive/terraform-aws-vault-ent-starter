@@ -72,7 +72,7 @@ variable "lb_health_check_path" {
 variable "lb_type" {
   description = "The type of load balancer to provision; network or application."
   type        = string
-  default     = "application"
+  default     = "network"
 
   validation {
     condition     = contains(["application", "network"], var.lb_type)
